@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fraud Guard — Transaction Check</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="app">
+      <header class="header">
+        <div class="header__brand">
+          <span class="logo" aria-hidden="true">◆</span>
+          <div>
+            <h1>Fraud Guard</h1>
+            <p class="tagline">Local ML fraud check — powered by your trained model</p>
+          </div>
+        </div>
+        <div class="header__status" id="apiStatus" role="status">
+          <span class="dot dot--muted"></span>
+          <span class="header__status-text">API not checked</span>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="card card--manual" id="manualCard" aria-labelledby="manual-title">
+          <div id="predictLoading" class="loading-overlay" hidden>
+            <div class="loading-overlay__box">
+              <div class="loading-overlay__spinner" aria-hidden="true"></div>
+              <p class="loading-overlay__text">Analyzing transaction…</p>
+            </div>
+          </div>
+          <h2 id="manual-title" class="card__title">Manual check</h2>
+          <p class="card__hint" id="featureConfigHint">Loading input configuration from the API…</p>
+          <form id="manualForm" class="form" novalidate>
+            <div class="form__group-label">Basic</div>
+            <div id="basicFields" class="form__fields"></div>
+            <details class="advanced-panel" id="advancedPanel">
+              <summary class="advanced-panel__summary">Advanced inputs (optional)</summary>
+              <p class="advanced-panel__hint" id="advancedPanelHint">
+                Risk and pattern signals are internal model inputs (PCA-style). Leave defaults if unsure — hover
+                labels for details.
+              </p>
+              <div id="advancedFields" class="form__fields"></div>
+            </details>
+            <button type="submit" class="btn btn--primary" id="btnCheck" disabled>
+              <span class="btn__text">Check fraud</span>
+              <span class="btn__spinner" hidden aria-hidden="true"></span>
+            </button>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="upload-title">
+          <h2 id="upload-title" class="card__title">Batch CSV</h2>
+          <p class="card__hint">
+            Upload a CSV with columns like <code>Time</code>, <code>Amount</code>, and optionally
+            <code>V1</code>…<code>V28</code>. Missing columns are filled automatically. Try the demo files in
+            <code>sample_data/</code>.
+          </p>
+          <div class="upload">
+            <label class="upload__label">
+              <input type="file" id="csvFile" accept=".csv,text/csv" class="upload__input" />
+              <span class="upload__fake">
+                <span class="upload__icon" aria-hidden="true">📄</span>
+                <span id="fileName" class="upload__name">No file selected</span>
+              </span>
+            </label>
+            <button type="button" class="btn btn--secondary" id="btnUpload">
+              <span class="btn__text">Upload &amp; predict</span>
+              <span class="btn__spinner" hidden aria-hidden="true"></span>
+            </button>
+          </div>
+        </section>
+
+        <section class="card card--output" aria-labelledby="output-title" aria-live="polite">
+          <h2 id="output-title" class="card__title">Result</h2>
+          <div id="outputEmpty" class="output-empty">
+            Run a manual check or upload a CSV to see predictions here.
+          </div>
+          <div id="outputPanel" class="output-panel" hidden>
+            <div id="manualResult" class="result-block" hidden>
+              <div class="result-block__badge" id="resultBadge">—</div>
+              <div class="result-block__metrics">
+                <div class="metric metric--wide">
+                  <span class="metric__label">Risk score</span>
+                  <span class="metric__value" id="riskScore">—</span>
+                  <div class="risk-bar" role="presentation">
+                    <div class="risk-bar__track">
+                      <div class="risk-bar__fill" id="riskBarFill"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="metric">
+                  <span class="metric__label">Risk level</span>
+                  <span class="metric__value metric__value--level" id="riskLevel">—</span>
+                </div>
+              </div>
+              <div class="subsection">
+                <h3 class="subsection__title">Risk factors</h3>
+                <ul class="factor-list" id="riskFactors"></ul>
+              </div>
+              <div class="subsection" id="actionsSection">
+                <h3 class="subsection__title">Recommended actions</h3>
+                <ul class="action-list" id="suggestedActions"></ul>
+              </div>
+              <div class="subsection insight-block">
+                <h3 class="subsection__title">System insight</h3>
+                <p class="insight-text" id="systemInsight"></p>
+              </div>
+              <p class="explanation" id="explanation"></p>
+            </div>
+            <div id="fileWarnings" class="warnings" hidden></div>
+            <div id="tableWrap" class="table-wrap" hidden>
+              <h3 class="table-title">Batch analysis</h3>
+              <p class="table-hint">Each row includes the same analysis depth as a manual check (factors and actions are in the API JSON).</p>
+              <div class="table-scroll">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Row</th>
+                      <th scope="col">Prediction</th>
+                      <th scope="col">Risk score</th>
+                      <th scope="col">Risk level</th>
+                      <th scope="col">Key factor</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div id="errorBanner" class="error-banner" role="alert" hidden></div>
+        </section>
+      </main>
+
+      <section class="card help-card" aria-labelledby="help-title">
+        <h2 id="help-title" class="card__title">Need help?</h2>
+        <p class="card__hint">
+          This tool is for education and decision support — it does not contact your bank. If you suspect fraud:
+        </p>
+        <ul class="help-list">
+          <li>
+            <strong>Your bank</strong> — call the number on the back of your card or use the bank’s official app /
+            website.
+          </li>
+          <li>
+            <strong>India — National Cybercrime Reporting Portal</strong> —
+            <a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer">cybercrime.gov.in</a>
+          </li>
+          <li>
+            <strong>India — RBI (Reserve Bank) helpline</strong> — dial <strong>14440</strong> (verify current hours
+            on the RBI website).
+          </li>
+        </ul>
+      </section>
+
+      <footer class="footer">
+        <p>Backend: <code>http://127.0.0.1:8000</code> — start with <code>uvicorn backend.main:app --reload</code></p>
+      </footer>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

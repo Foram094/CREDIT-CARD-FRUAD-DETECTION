@@ -1,0 +1,57 @@
+{
+  "selected_features": [
+    "Time",
+    "Amount",
+    "V14",
+    "V4",
+    "V22",
+    "V12"
+  ],
+  "feature_types": {
+    "V14": "behavior",
+    "V4": "behavior",
+    "V22": "behavior",
+    "V12": "behavior",
+    "Time": "number",
+    "Amount": "number"
+  },
+  "behavior_labels": {
+    "V14": "Risk signal 1",
+    "V4": "Risk signal 2",
+    "V22": "Pattern signal 1",
+    "V12": "Pattern signal 2"
+  },
+  "ranges": {
+    "Time": {
+      "min": 2421.0,
+      "max": 178967.887001,
+      "default": 84692.0
+    },
+    "Amount": {
+      "min": -0.88,
+      "max": 1068.8625010000012,
+      "default": 22.0
+    },
+    "V14": {
+      "min": -3.047267463288716,
+      "max": 2.3978037107804906,
+      "default": 0.0506013193100486
+    },
+    "V4": {
+      "min": -3.4915386166928877,
+      "max": 4.616583599777449,
+      "default": -0.0198465294811989
+    },
+    "V22": {
+      "min": -1.813865210030274,
+      "max": 1.6893917688174378,
+      "default": 0.0067819425282695
+    },
+    "V12": {
+      "min": -3.3020646681349484,
+      "max": 1.9367027513842352,
+      "default": 0.140032588291332
+    }
+  },
+  "signal_help": "Derived model feature (no direct real-world meaning). Internal signals produced from transaction patterns \u2014 not a literal field like location."
+}
