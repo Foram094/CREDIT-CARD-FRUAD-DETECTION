@@ -1,3 +1,29 @@
+/*
+## Dataset Setup
+
+This project uses the Kaggle Credit Card Fraud Detection dataset.
+
+Due to size constraints, the dataset is not included in the repository.
+
+Steps:
+
+1. Download dataset from Kaggle
+2. Place `creditcard.csv` in project root folder
+
+The system will still run without it, but dataset improves:
+
+* feature selection
+* default values
+* input ranges
+
+
+
+
+
+
+*/
+
+
 # Fraud Guard — local fraud detection demo
 
 Stack: **FastAPI** backend, **HTML/CSS/JS** frontend, **scikit-learn** model (`fraud_model.pkl` or auto-train from `creditcard.csv`).
